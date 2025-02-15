@@ -29,18 +29,11 @@ await db.exec(`CREATE TABLE IF NOT EXISTS users (
   chess_url TEXT,
   last_online INTEGER
 )`);
-/*
-db.run(`CREATE TABLE IF NOT EXISTS users (
-  chess_username TEXT PRIMARY KEY,
-  discord_id TEXT NOT NULL,
-  chess_url TEXT
-)`);
-*/
+
 /**
  * Interactions endpoint URL where Discord will send HTTP requests
  * Parse request body and verifies incoming requests using discord-interactions package
  */
-
 
 const client = new Client({
   intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages],
@@ -51,8 +44,8 @@ client.login(process.env.DISCORD_TOKEN);
 // Wait until the bot is ready before using it
 client.once('ready', async () => {
   console.log(`Logged in as ${client.user.tag}!`);
-  sendMessageToChannel(process.env.ACITVITY_CHANNEL_ID, 'Chess Bot starting...')
-  sendUpdateMessages(process.env.ACITVITY_CHANNEL_ID, await getStoredUsers());
+  await sendMessageToChannel(process.env.ACITVITY_CHANNEL_ID, 'Chess Bot starting...')
+  await sendUpdateMessages(process.env.ACITVITY_CHANNEL_ID, await getStoredUsers());
 });
 
 
