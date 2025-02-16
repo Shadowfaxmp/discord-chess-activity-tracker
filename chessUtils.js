@@ -18,6 +18,7 @@ export async function fetchUserProfile(username) {
 
     return await getResponse(url);
 }
+
 async function getResponse(link) {
     try {
         const response = await fetch(link);
@@ -36,6 +37,7 @@ export function getRandomWinMsg(timeControl, username, ratingChange, newRating) 
         `${username} just bullied an orphan for ${Math.abs(ratingChange)} points of ${timeControl} rating. New ${timeControl} rating: ${newRating}. Was it worth it?`,
         `${username} isn't beating the cheating allegations. ${username.charAt(0).toUpperCase() + username.slice(1).toLowerCase()} just got +${Math.abs(ratingChange)} ${timeControl} rating`
     ];
+
     return randomWinMessages[Math.floor(Math.random() * randomWinMessages.length)];
 }
 
