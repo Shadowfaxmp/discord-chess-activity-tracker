@@ -36,8 +36,6 @@ export async function sendUpdateMessages(channel_id, dbUsers) {
             } catch (error) {
                 console.error(error);
             }
-
-
         }
     };
 
