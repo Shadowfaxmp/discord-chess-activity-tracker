@@ -29,7 +29,12 @@ async function getResponse(link) {
     }
 }
 
-export function getRandomWinMsg(timeControl, username, ratingChange, newRating) {
+export async function fetchUserMostRecentGame(username) {
+    const mostRecentGames = await fetchPlayerRecentGames(username);
+    return mostRecentGames.games[mostRecentGames.games.length-1];
+}
+
+export function getRandomWinMsg(timeControl, username, ratingChange, newRating, gameUrl) {
     const randomWinMessages = [
         `${username} just lost ${Math.abs(ratingChange)} points in ${timeControl} rating. New ${timeControl} rating: ${newRating}`,
         `Boom! ${username} just leveled up by ${Math.abs(ratingChange)} points in ${timeControl}. New rating: ${newRating}. Who needs Stockfish?`,
@@ -38,10 +43,10 @@ export function getRandomWinMsg(timeControl, username, ratingChange, newRating) 
         `${username} isn't beating the cheating allegations. ${username.charAt(0).toUpperCase() + username.slice(1).toLowerCase()} just got +${Math.abs(ratingChange)} ${timeControl} rating`
     ];
 
-    return randomWinMessages[Math.floor(Math.random() * randomWinMessages.length)];
+    return randomWinMessages[Math.floor(Math.random() * randomWinMessages.length)] + `\nCheck out the game here! ${gameUrl}`;
 }
 
-export function getRandomLoseMsg(timeControl, username, ratingChange, newRating) {
+export function getRandomLoseMsg(timeControl, username, ratingChange, newRating, gameUrl) {
     const randomLoseMessages = [
         `${username} just lost to a small child. Lost ${Math.abs(ratingChange)} points in ${timeControl} rating. New ${timeControl} rating: ${newRating}`,
         `${username} just threw again. Lost ${Math.abs(ratingChange)} points in ${timeControl} rating. New ${timeControl} rating: ${newRating}`,
@@ -49,5 +54,5 @@ export function getRandomLoseMsg(timeControl, username, ratingChange, newRating)
         `There are three guarantees in life: death, taxes, and ${username} losing ${timeControl} games. ${username} lost ${ratingChange} ${timeControl} rating. (New rating: ${newRating})`,
         `Not many things are certain in life, but one thing definitely is — ${username} losing chess games. ${username} just lost ${ratingChange} ${timeControl} rating. New ${timeControl} rating: ${newRating}`,
     ];
-    return randomLoseMessages[Math.floor(Math.random() * randomLoseMessages.length)];
+    return randomLoseMessages[Math.floor(Math.random() * randomLoseMessages.length)] + `\nCheck out the game here! ${gameUrl}`;
 }

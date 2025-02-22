@@ -1,38 +1,43 @@
-import {fetchUserStats, getRandomWinMsg, getRandomLoseMsg} from "./chessUtils.js";
-import {sendMessageToChannel} from "./app.js";
+import {fetchUserStats, getRandomWinMsg, getRandomLoseMsg, fetchUserMostRecentGame} from "./chessUtils.js";
+import {sendMessageToChannel, updateRatings, getUserRating} from "./app.js";
 import * as console from "node:console";
 
 export async function sendUpdateMessages(channel_id, dbUsers) {
 
     console.log('sending updates');
-    let ratings = await getInitialStats(dbUsers);
+    await get_most_recent_stats(dbUsers);
     const checkAndSendUpdates = async () => {
         for (const user of dbUsers) {
             const currentUser = user.chess_username;
 
             try {
                 const profile = await fetchUserStats(currentUser);
-                const timeControls = ['chess_blitz', 'chess_bullet', 'chess_rapid'];
 
-                for (const type of timeControls) {
-                    const currentRating = profile[type].last.rating;
-                    const lastRating = ratings.get(currentUser)[type].last.rating;
+                const mostRecentGame = await fetchUserMostRecentGame(currentUser);
+                const newRatings = {
+                    chess_bullet: profile.chess_bullet.last.rating,
+                    chess_blitz: profile.chess_blitz.last.rating,
+                    chess_rapid: profile.chess_rapid.last.rating,
+                    recent_game: mostRecentGame.url
+                }
 
-                    if (currentRating !== lastRating) {
-                        const ratingChange = currentRating - lastRating;
-                        console.log(`Current ${type} rating: ${currentRating} -- Last cached rating: ${lastRating}`);
+                const lastRating = await getUserRating(user.chess_username);
+
+                if (newRatings.recent_game !== lastRating.recent_game) {
+                    const ratingChange = currentRating - lastRating;
+                    console.log(`Current ${type} rating: ${currentRating} -- Last cached rating: ${lastRating}`);
 
                         if (currentRating < lastRating) {
                             console.log(`${currentUser} just lost ${Math.abs(ratingChange)} points in ${type} rating`);
-                            await sendMessageToChannel(channel_id, getRandomLoseMsg(type, currentUser, ratingChange, currentRating));
+                            await sendMessageToChannel(channel_id, getRandomLoseMsg(mostRecentGame.time_class, currentUser, ratingChange, currentRating, mostRecentGame.url));
                         } else {
                             console.log(`${currentUser} just gained ${ratingChange} points in ${type} rating`);
-                            await sendMessageToChannel(channel_id, getRandomWinMsg(type, currentUser, ratingChange, currentRating));
+                            await sendMessageToChannel(channel_id, getRandomWinMsg(mostRecentGame.time_class, currentUser, ratingChange, currentRating, mostRecentGame.url));
                         }
                         // Update the cached profile once a change is detected.
-                        ratings.set(currentUser, profile);
+                        await updateRatings(user.chess_username, newRatings)
                     }
-                }
+
             } catch (error) {
                 console.error(error);
             }
@@ -45,10 +50,17 @@ export async function sendUpdateMessages(channel_id, dbUsers) {
         await checkAndSendUpdates(); // Recheck every 10 seconds
     }, 10000);
 }
-async function getInitialStats(dbUsers) {
-    const ratings = new Map;
+async function get_most_recent_stats(dbUsers) {
     for (const user of dbUsers) {
-        ratings.set(user.chess_username, await fetchUserStats(user.chess_username));
+        const mostRecentGame = await fetchUserMostRecentGame(user.chess_username);
+        const userStats = await fetchUserStats(user.chess_username);
+        const userRatings = {
+            chess_bullet: userStats.chess_bullet.last.rating,
+            chess_blitz: userStats.chess_blitz.last.rating,
+            chess_rapid: userStats.chess_rapid.last.rating,
+            recent_game: mostRecentGame.url
+        };
+
+        updateRatings(user.chess_username, userRatings);
     }
-    return ratings;
 }

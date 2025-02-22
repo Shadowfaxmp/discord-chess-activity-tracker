@@ -8,7 +8,7 @@ import {
   verifyKeyMiddleware,
 } from 'discord-interactions';
 import {getRandomEmoji} from './utils.js';
-import {fetchUserProfile} from "./chessUtils.js";
+import {fetchUserProfile, fetchUserStats, fetchUserMostRecentGame} from "./chessUtils.js";
 import sqlite3 from 'sqlite3';
 import { open } from 'sqlite';
 import {sendUpdateMessages} from './sendUpdateMessages.js';
@@ -27,8 +27,12 @@ await db.exec(`CREATE TABLE IF NOT EXISTS users (
   chess_username TEXT PRIMARY KEY,
   discord_id TEXT,
   chess_url TEXT,
-  last_online INTEGER
-)`);
+  last_online INTEGER,
+  bullet_rating INTEGER,
+  blitz_rating INTEGER,
+  rapid_rating INTEGER,
+  most_recent_game TEXT
+  )`);
 
 /**
  * Interactions endpoint URL where Discord will send HTTP requests
@@ -142,19 +146,32 @@ app.post('/interactions', verifyKeyMiddleware(process.env.PUBLIC_KEY), async fun
 
       //Try to fetch usernames chess.com information
       let userChessInfo = await fetchUserProfile(userInput);
-
+      const userMostRecentGame = await fetchUserMostRecentGame(userInput);
+      console.log(userMostRecentGame);
       console.log(userChessInfo);
         if (userChessInfo != null) {
-
+            const userStats = await fetchUserStats(userInput);
             // Store the new username even if the same discord_id already exists
             await db.run(
-                `INSERT INTO users (chess_username, discord_id, chess_url, last_online)
-                    VALUES (?, ?, ?, ?)
+                `INSERT INTO users (chess_username, discord_id, chess_url, last_online, bullet_rating, blitz_rating, rapid_rating, most_recent_game)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
                     ON CONFLICT(chess_username) DO UPDATE 
                     SET discord_id = excluded.discord_id, 
                         chess_url = excluded.chess_url,
-                        last_online = excluded.last_online`,
-                [userChessInfo.username, userId, userChessInfo.url, userChessInfo.last_online]
+                        last_online = excluded.last_online,
+                        bullet_rating = excluded.bullet_rating,
+                        blitz_rating = excluded.blitz_rating,
+                        rapid_rating = excluded.rapid_rating,
+                        most_recent_game = excluded.most_recent_game`,
+
+                [userChessInfo.username,
+                  userId,
+                  userChessInfo.url,
+                  userChessInfo.last_online,
+                  userStats.chess_bullet.last.rating,
+                  userStats.chess_blitz.last.rating,
+                  userStats.chess_rapid.last.rating,
+                  userMostRecentGame.url]
             );
 
           console.log(`Stored/Updated ${userId} -> ${userChessInfo.username}`);
@@ -229,6 +246,49 @@ async function getStoredUsers() {
     console.error("Error fetching users:", error);
   }
 }
+
+export async function updateRatings(chessUsername, newRatings) {
+  try {
+    await db.run(
+        `UPDATE users 
+             SET bullet_rating = ?, 
+                 blitz_rating = ?, 
+                 rapid_rating = ?,
+                 most_recent_game = ?
+             WHERE chess_username = ?`,
+        [newRatings.chess_bullet, newRatings.chess_blitz, newRatings.chess_rapid, newRatings.recent_game, chessUsername]
+    );
+
+    console.log(`Updated ratings for ${chessUsername}:`, newRatings);
+  } catch (error) {
+    console.error(`Error updating ratings for ${chessUsername}:`, error);
+  }
+}
+
+export async function getUserRating(chessUsername) {
+  try {
+    const row = await db.get(
+        `SELECT bullet_rating, blitz_rating, rapid_rating, most_recent_game FROM users WHERE chess_username = ?`,
+        [chessUsername]
+    );
+
+    if (row) {
+      return {
+        chess_bullet: row.bullet_rating,
+        chess_blitz: row.blitz_rating,
+        chess_rapid: row.rapid_rating,
+        recent_game: row.most_recent_game
+      };
+    } else {
+      console.log(`No ratings found for ${chessUsername}`);
+      return null;
+    }
+  } catch (error) {
+    console.error(`Error fetching ratings for ${chessUsername}:`, error);
+    return null;
+  }
+}
+
 
 app.listen(PORT, () => {
   console.log('Listening on port', PORT);
