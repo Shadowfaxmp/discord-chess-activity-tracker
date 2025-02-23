@@ -3,10 +3,10 @@ import {sendMessageToChannel, updateRatings, getUserRating} from "./app.js";
 import * as console from "node:console";
 
 export async function sendUpdateMessages(channel_id, dbUsers) {
-
     console.log('sending updates');
     await get_most_recent_stats(dbUsers);
     const checkAndSendUpdates = async () => {
+        console.log('Checking for changes');
         for (const user of dbUsers) {
             const currentUser = user.chess_username;
 
