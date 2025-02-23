@@ -67,3 +67,19 @@ export function getRandomLoseMsg(timeControl, username, ratingChange, newRating,
     ];
     return randomLoseMessages[Math.floor(Math.random() * randomLoseMessages.length)] + `\nCheck out the game here! ${gameUrl}`;
 }
+
+export function getRandomDrawMsg(timeControl, username, ratingChange, newRating, gameUrl) {
+    const randomDrawMessages = [
+        `A tale as old as time: ${username} couldn't close the game. A draw in ${timeControl}. Rating change: ${ratingChange}. New rating: ${newRating}.`,
+        `Two titans clashed... and neither won. ${username} drew a ${timeControl} game. Rating change: ${ratingChange}. New rating: ${newRating}.`,
+        `Not a win, not a loss, just a whole lot of wasted time. ${username} drew in ${timeControl}. New rating: ${newRating}.`,
+        `Some say a draw is just a loss without consequences. ${username} couldn't decide today. Rating change: ${ratingChange}. New rating: ${newRating}.`,
+        `50 moves, 3 blunders, 2 missed mates, and a stalemate. ${username} secures the most unsatisfying result in chess: a draw. Rating change: ${ratingChange}. New rating: ${newRating}.`,
+        `It's not about winning or losing, it's about sending a message. ${username} just drew a ${timeControl} game. New rating: ${newRating}.`,
+        `You either die a hero or live long enough to see yourself draw. ${username} with a ${timeControl} draw. Rating change: ${ratingChange}. New rating: ${newRating}.`,
+        `Another draw? ${username} might be allergic to winning. ${timeControl} game ends in a tie. New rating: ${newRating}.`,
+        `Somewhere, a chess coach just sighed. ${username} drew in ${timeControl}. New rating: ${newRating}.`,
+        `A draw? Really? ${username} out here making sure nobody has fun. New rating: ${newRating}.`,
+    ];
+    return randomDrawMessages[Math.floor(Math.random() * randomDrawMessages.length)] + `\nCheck out the game here! ${gameUrl}`;
+}
