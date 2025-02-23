@@ -50,8 +50,10 @@ export async function sendUpdateMessages(channel_id, dbUsers) {
                     if (game_result === "loss") {
                         console.log(`${currentUser} just lost ${Math.abs(ratingChange)} points in ${time_control} rating`);
                         await sendMessageToChannel(channel_id, getRandomLoseMsg(time_control, currentUser, ratingChange, new_rating, mostRecentGame.url));
-                    } else {
+                    } else if(game_result === "win"){
                         console.log(`${currentUser} just gained ${ratingChange} points in ${time_control} rating`);
+                        await sendMessageToChannel(channel_id, getRandomWinMsg(time_control, currentUser, ratingChange, new_rating, mostRecentGame.url));
+                    } else if(game_result === "draw") {
                         await sendMessageToChannel(channel_id, getRandomWinMsg(time_control, currentUser, ratingChange, new_rating, mostRecentGame.url));
                     }
                     // Update the cached profile once a change is detected.
