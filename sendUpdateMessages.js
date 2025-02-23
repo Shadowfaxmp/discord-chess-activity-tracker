@@ -6,7 +6,7 @@ export async function sendUpdateMessages(channel_id, dbUsers) {
     console.log('sending updates');
     await get_most_recent_stats(dbUsers);
     const checkAndSendUpdates = async () => {
-        console.log('Checking for changes');
+        console.log(`Checking for changes for ${dbUsers}`);
         for (const user of dbUsers) {
             const currentUser = user.chess_username;
 
