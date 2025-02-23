@@ -34,6 +34,17 @@ export async function fetchUserMostRecentGame(username) {
     return mostRecentGames.games[mostRecentGames.games.length-1];
 }
 
+export function get_game_result(player, game) {
+    if (game.black.username === player && game.black.result === "win" || game.white.username === player && game.white.result === "win") {
+        return "win"
+    } else if((game.black.username === player && (game.black.result === "checkmated" || game.black.result === "resigned" || game.black.result === "timeout" || game.black.result === "abandoned" || game.black.result === "lose")) ||
+        (game.white.username === player && (game.white.result === "checkmated" || game.white.result === "resigned" || game.white.result === "timeout" || game.white.result === "abandoned" || game.white.result === "lose"))) {
+        return "loss"
+    } else {
+        return "draw"
+    }
+}
+
 export function getRandomWinMsg(timeControl, username, ratingChange, newRating, gameUrl) {
     const randomWinMessages = [
         `${username} just lost ${Math.abs(ratingChange)} points in ${timeControl} rating. New ${timeControl} rating: ${newRating}`,
