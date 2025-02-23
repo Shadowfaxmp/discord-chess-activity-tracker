@@ -1,4 +1,4 @@
-import {fetchUserStats, getRandomWinMsg, getRandomLoseMsg, fetchUserMostRecentGame} from "./chessUtils.js";
+import {fetchUserStats, getRandomWinMsg, getRandomLoseMsg, fetchUserMostRecentGame, get_game_result} from "./chessUtils.js";
 import {sendMessageToChannel, updateRatings, getUserRating} from "./app.js";
 import * as console from "node:console";
 
@@ -24,18 +24,38 @@ export async function sendUpdateMessages(channel_id, dbUsers) {
                 const lastRating = await getUserRating(user.chess_username);
 
                 if (newRatings.recent_game !== lastRating.recent_game) {
-                    const ratingChange = currentRating - lastRating;
-                    console.log(`Current ${type} rating: ${currentRating} -- Last cached rating: ${lastRating}`);
+                    const time_control = mostRecentGame.time_class;
+                    let ratingChange = 0;
+                    let new_rating = 0;
 
-                        if (currentRating < lastRating) {
-                            console.log(`${currentUser} just lost ${Math.abs(ratingChange)} points in ${type} rating`);
-                            await sendMessageToChannel(channel_id, getRandomLoseMsg(mostRecentGame.time_class, currentUser, ratingChange, currentRating, mostRecentGame.url));
-                        } else {
-                            console.log(`${currentUser} just gained ${ratingChange} points in ${type} rating`);
-                            await sendMessageToChannel(channel_id, getRandomWinMsg(mostRecentGame.time_class, currentUser, ratingChange, currentRating, mostRecentGame.url));
-                        }
-                        // Update the cached profile once a change is detected.
-                        await updateRatings(user.chess_username, newRatings)
+                    if(time_control === "rapid") {
+
+                        ratingChange = newRatings.chess_rapid - lastRating.chess_rapid;
+                        new_rating = newRatings.chess_rapid;
+
+                    } else if (time_control === "blitz") {
+
+                        ratingChange = newRatings.chess_blitz - lastRating.chess_blitz;
+                        new_rating = newRatings.chess_blitz;
+
+                    } else if (time_control === "bullet") {
+
+                        ratingChange = newRatings.chess_bullet - lastRating.chess_bullet;
+                        new_rating = newRatings.chess_bullet;
+
+                    }
+
+                    const game_result = get_game_result(user.chess_username, mostRecentGame);
+
+                    if (game_result === "loss") {
+                        console.log(`${currentUser} just lost ${Math.abs(ratingChange)} points in ${time_control} rating`);
+                        await sendMessageToChannel(channel_id, getRandomLoseMsg(time_control, currentUser, ratingChange, new_rating, mostRecentGame.url));
+                    } else {
+                        console.log(`${currentUser} just gained ${ratingChange} points in ${time_control} rating`);
+                        await sendMessageToChannel(channel_id, getRandomWinMsg(time_control, currentUser, ratingChange, new_rating, mostRecentGame.url));
+                    }
+                    // Update the cached profile once a change is detected.
+                    await updateRatings(user.chess_username, newRatings)
                     }
 
             } catch (error) {
