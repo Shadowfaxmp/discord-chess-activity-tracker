@@ -20,7 +20,6 @@ export async function sendUpdateMessages(channel_id) {
     let userRatingsMap = await get_most_recent_stats();
     // Function to check for updates
     const checkAndSendUpdates = async () => {
-        console.log('Checking for changes...');
 
         for (const username of club_members) {
             try {
@@ -39,11 +38,11 @@ export async function sendUpdateMessages(channel_id) {
                     recent_game: most_recent_game
                 };
 
-                //console.log(`Most recent game for ${username}: ${newRatings.recent_game}`);
-
                 const lastRating = userRatingsMap.get(username);
 
                 if (!lastRating || newRatings.recent_game !== lastRating.recent_game) {
+
+                    console.log(`New game detected for ${username}`);
                     // Determine the rating change
                     const time_control = mostRecentGame?.time_class;
                     let ratingChange = 0;
