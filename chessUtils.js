@@ -25,7 +25,7 @@ export async function fetchPlayerRecentGames(userName) {
     }
 }
 
-export async function fetchUserMostRecentGame(username) {
+    export async function fetchUserMostRecentGame(username) {
     const mostRecentGames = await fetchPlayerRecentGames(username);
 
     if (mostRecentGames.games && mostRecentGames.games.length > 0) {
@@ -59,14 +59,6 @@ async function getResponse(link) {
 }
 
 export function get_game_result(player, game) {
-    console.log(game);
-
-    console.log(player);
-    console.log('Black username:' + game.black.username);
-    console.log(game.black.result);
-
-    console.log('White usesrname: ' + game.white.username);
-    console.log(game.white.result);
 
     if ((game.black.username.toLowerCase() === player.toLowerCase() && game.black.result === "win") || (game.white.username.toLowerCase() === player.toLowerCase() && game.white.result === "win")) {
         return "win";
@@ -80,7 +72,6 @@ export function get_game_result(player, game) {
 
 export function getRandomWinMsg(timeControl, username, ratingChange, newRating, gameUrl) {
     const randomWinMessages = [
-        `${username} just lost ${Math.abs(ratingChange)} points in ${timeControl} rating. New ${timeControl} rating: ${newRating}`,
         `Boom! ${username} just leveled up by ${Math.abs(ratingChange)} points in ${timeControl}. New rating: ${newRating}. Who needs Stockfish?`,
         `Look out, ${username} just gained ${Math.abs(ratingChange)} points and now rocking a ${newRating} ${timeControl} rating!`,
         `${username} just bullied an orphan for ${Math.abs(ratingChange)} points of ${timeControl} rating. New ${timeControl} rating: ${newRating}. Was it worth it?`,
