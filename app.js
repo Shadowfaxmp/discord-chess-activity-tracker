@@ -1,38 +1,15 @@
 import { Client, GatewayIntentBits } from 'discord.js';
 import 'dotenv/config';
 import express from 'express';
-import {
-  InteractionType,
-  InteractionResponseType,
-  MessageComponentTypes,
-  verifyKeyMiddleware,
-} from 'discord-interactions';
+import { InteractionType, InteractionResponseType, MessageComponentTypes, verifyKeyMiddleware,} from 'discord-interactions';
 import {getRandomEmoji} from './utils.js';
 import {fetchUserProfile, fetchUserStats, fetchUserMostRecentGame} from "./chessUtils.js";
-import sqlite3 from 'sqlite3';
-import { open } from 'sqlite';
 import {sendUpdateMessages} from './sendUpdateMessages.js';
 
-const db = await open({
-  filename: './chess_users.db',
-  driver: sqlite3.Database
-});
 // Create an express app
 const app = express();
 // Get port, or default to 3000
 const PORT = process.env.PORT;
-
-//Create database to store usernames
-await db.exec(`CREATE TABLE IF NOT EXISTS users (
-  chess_username TEXT PRIMARY KEY,
-  discord_id TEXT,
-  chess_url TEXT,
-  last_online INTEGER,
-  bullet_rating INTEGER,
-  blitz_rating INTEGER,
-  rapid_rating INTEGER,
-  most_recent_game TEXT
-  )`);
 
 /**
  * Interactions endpoint URL where Discord will send HTTP requests
@@ -49,7 +26,7 @@ client.login(process.env.DISCORD_TOKEN);
 client.once('ready', async () => {
   console.log(`Logged in as ${client.user.tag}!`);
   await sendMessageToChannel(process.env.ACITVITY_CHANNEL_ID, 'Chess Bot starting...')
-  await sendUpdateMessages(process.env.ACITVITY_CHANNEL_ID, await getStoredUsers());
+  await sendUpdateMessages(process.env.ACITVITY_CHANNEL_ID);
 });
 
 
@@ -114,7 +91,7 @@ app.post('/interactions', verifyKeyMiddleware(process.env.PUBLIC_KEY), async fun
 
     if(name === 'set_chess_activity_channel' && id) {
       console.log(req.body.channel.id);
-      sendUpdateMessages(req.body.channel.id);
+      //sendUpdateMessages(req.body.channel.id);
       return res.send({
         type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
         data: {
@@ -150,37 +127,12 @@ app.post('/interactions', verifyKeyMiddleware(process.env.PUBLIC_KEY), async fun
       console.log(userMostRecentGame);
       console.log(userChessInfo);
         if (userChessInfo != null) {
-            const userStats = await fetchUserStats(userInput);
-            // Store the new username even if the same discord_id already exists
-            await db.run(
-                `INSERT INTO users (chess_username, discord_id, chess_url, last_online, bullet_rating, blitz_rating, rapid_rating, most_recent_game)
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-                    ON CONFLICT(chess_username) DO UPDATE 
-                    SET discord_id = excluded.discord_id, 
-                        chess_url = excluded.chess_url,
-                        last_online = excluded.last_online,
-                        bullet_rating = excluded.bullet_rating,
-                        blitz_rating = excluded.blitz_rating,
-                        rapid_rating = excluded.rapid_rating,
-                        most_recent_game = excluded.most_recent_game`,
-
-                [userChessInfo.username,
-                  userId,
-                  userChessInfo.url,
-                  userChessInfo.last_online,
-                  userStats.chess_bullet.last.rating,
-                  userStats.chess_blitz.last.rating,
-                  userStats.chess_rapid.last.rating,
-                  userMostRecentGame.url]
-            );
-
-          console.log(`Stored/Updated ${userId} -> ${userChessInfo.username}`);
-          await getStoredUsers();
 
           return res.send({
             type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
             data: {
-              content: `<@${userId}> linked their Chess.com account!\n<@${userId}> is ${userChessInfo.username} on Chess.com, why don't you go add them as a friend ${userChessInfo.url}?`,
+              content: `The link account command is currently unavailable`,
+              flags: 64,
             },
           });
         } else {
@@ -236,59 +188,6 @@ export async function sendMessageToChannel(channelId, message) {
     console.error('Error in sendMessageToChannel:', error);
   }
 }
-
-async function getStoredUsers() {
-  try {
-    const rows = await db.all("SELECT * FROM users");
-    console.log("Stored Chess.com Users:", rows);
-    return rows;
-  } catch (error) {
-    console.error("Error fetching users:", error);
-  }
-}
-
-export async function updateRatings(chessUsername, newRatings) {
-  try {
-    await db.run(
-        `UPDATE users 
-             SET bullet_rating = ?, 
-                 blitz_rating = ?, 
-                 rapid_rating = ?,
-                 most_recent_game = ?
-             WHERE chess_username = ?`,
-        [newRatings.chess_bullet, newRatings.chess_blitz, newRatings.chess_rapid, newRatings.recent_game, chessUsername]
-    );
-
-    console.log(`Updated ratings for ${chessUsername}:`, newRatings);
-  } catch (error) {
-    console.error(`Error updating ratings for ${chessUsername}:`, error);
-  }
-}
-
-export async function getUserRating(chessUsername) {
-  try {
-    const row = await db.get(
-        `SELECT bullet_rating, blitz_rating, rapid_rating, most_recent_game FROM users WHERE chess_username = ?`,
-        [chessUsername]
-    );
-
-    if (row) {
-      return {
-        chess_bullet: row.bullet_rating,
-        chess_blitz: row.blitz_rating,
-        chess_rapid: row.rapid_rating,
-        recent_game: row.most_recent_game
-      };
-    } else {
-      console.log(`No ratings found for ${chessUsername}`);
-      return null;
-    }
-  } catch (error) {
-    console.error(`Error fetching ratings for ${chessUsername}:`, error);
-    return null;
-  }
-}
-
 
 app.listen(PORT, () => {
   console.log('Listening on port', PORT);
