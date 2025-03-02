@@ -25,7 +25,7 @@ client.login(process.env.DISCORD_TOKEN);
 // Wait until the bot is ready before using it
 client.once('ready', async () => {
   console.log(`Logged in as ${client.user.tag}!`);
-  await sendMessageToChannel(process.env.ACITVITY_CHANNEL_ID, 'Chess Bot starting...')
+  //await sendMessageToChannel(process.env.ACITVITY_CHANNEL_ID, 'Chess Bot starting...');
   await sendUpdateMessages(process.env.ACITVITY_CHANNEL_ID);
 });
 
