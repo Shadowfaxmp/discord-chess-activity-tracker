@@ -2,10 +2,39 @@
 //https://api.chess.com/pub/player/shadowfaxknight/games/2025/02
 
 export async function fetchPlayerRecentGames(userName) {
-    const url = `https://api.chess.com/pub/player/${userName.toLowerCase()}/games/2025/02`;
+    const currentTime = new Date();
+    let year = currentTime.getFullYear();
+    let month = currentTime.getMonth() + 1; // getMonth() returns 0-based index
+    const formattedMonth = month.toString().padStart(2, '0'); // Ensure two-digit format
 
-    return await getResponse(url);
+    const url = `https://api.chess.com/pub/player/${userName.toLowerCase()}/games/${year}/${formattedMonth}`;
+
+    try {
+        const response = await getResponse(url);
+
+        // Ensure response is valid
+        if (!response || typeof response !== "object" || !response.games) {
+            console.error("Invalid API response:", response);
+            return { games: [] }; // Return an empty object with `games` array to avoid undefined errors
+        }
+
+        return response; // Should be in format { games: [...] }
+    } catch (error) {
+        console.error(`Error fetching recent games for ${userName}:`, error);
+        return { games: [] };
+    }
 }
+
+export async function fetchUserMostRecentGame(username) {
+    const mostRecentGames = await fetchPlayerRecentGames(username);
+
+    if (mostRecentGames.games && mostRecentGames.games.length > 0) {
+        return mostRecentGames.games[mostRecentGames.games.length - 1]; // Get last game in the list
+    } else {
+        return ``;
+    }
+}
+
 
 export async function fetchUserStats(userName) {
     const url = `https://api.chess.com/pub/player/${userName.toLowerCase()}/stats`;
@@ -29,21 +58,25 @@ async function getResponse(link) {
     }
 }
 
-export async function fetchUserMostRecentGame(username) {
-    const mostRecentGames = await fetchPlayerRecentGames(username);
-    return mostRecentGames.games[mostRecentGames.games.length-1];
-}
-
 export function get_game_result(player, game) {
-    if (game.black.username === player && game.black.result === "win" || game.white.username === player && game.white.result === "win") {
-        return "win"
-    } else if((game.black.username === player && (game.black.result === "checkmated" || game.black.result === "resigned" || game.black.result === "timeout" || game.black.result === "abandoned" || game.black.result === "lose")) ||
-        (game.white.username === player && (game.white.result === "checkmated" || game.white.result === "resigned" || game.white.result === "timeout" || game.white.result === "abandoned" || game.white.result === "lose"))) {
-        return "loss"
+    console.log(game);
+
+    console.log(player);
+    console.log('Black username:' + game.black.username);
+    console.log(game.black.result);
+
+    console.log('White usesrname: ' + game.white.username);
+    console.log(game.white.result);
+
+    if ((game.black.username.toLowerCase() === player.toLowerCase() && game.black.result === "win") || (game.white.username.toLowerCase() === player.toLowerCase() && game.white.result === "win")) {
+        return "win";
+    } else if ((game.black.username.toLowerCase() === player.toLowerCase() && ["checkmated", "resigned", "timeout", "abandoned", "lose"].includes(game.black.result)) || (game.white.username.toLowerCase() === player.toLowerCase() && ["checkmated", "resigned", "timeout", "abandoned", "lose"].includes(game.white.result))) {
+        return "loss";
     } else {
-        return "draw"
+        return "draw";
     }
 }
+
 
 export function getRandomWinMsg(timeControl, username, ratingChange, newRating, gameUrl) {
     const randomWinMessages = [
