@@ -3,8 +3,8 @@ import 'dotenv/config';
 import express from 'express';
 import { InteractionType, InteractionResponseType, MessageComponentTypes, verifyKeyMiddleware,} from 'discord-interactions';
 import {getRandomEmoji} from './utils.js';
-import {fetchUserProfile, fetchUserStats, fetchUserMostRecentGame} from "./chessUtils.js";
-import {sendUpdateMessages} from './sendUpdateMessages.js';
+import {get_chess_profile, get_most_recent_game} from "./chessUtils.js";
+import {check_for_updates} from './check_for_updates.js';
 
 // Create an express app
 const app = express();
@@ -26,7 +26,7 @@ client.login(process.env.DISCORD_TOKEN);
 client.once('ready', async () => {
   console.log(`Logged in as ${client.user.tag}!`);
   //await sendMessageToChannel(process.env.ACITVITY_CHANNEL_ID, 'Chess Bot starting...');
-  await sendUpdateMessages(process.env.ACITVITY_CHANNEL_ID);
+  await check_for_updates(process.env.ACITVITY_CHANNEL_ID);
 });
 
 
@@ -35,9 +35,6 @@ app.post('/interactions', verifyKeyMiddleware(process.env.PUBLIC_KEY), async fun
   // Interaction type and data
   const { type, id, data } = req.body;
 
-  /**
-   * Handle verification requests
-   */
   if (type === InteractionType.PING) {
     return res.send({ type: InteractionResponseType.PONG });
   }
@@ -122,8 +119,8 @@ app.post('/interactions', verifyKeyMiddleware(process.env.PUBLIC_KEY), async fun
       }
 
       //Try to fetch usernames chess.com information
-      let userChessInfo = await fetchUserProfile(userInput);
-      const userMostRecentGame = await fetchUserMostRecentGame(userInput);
+      let userChessInfo = await get_chess_profile(userInput);
+      const userMostRecentGame = await get_most_recent_game(userInput);
       console.log(userMostRecentGame);
       console.log(userChessInfo);
         if (userChessInfo != null) {
@@ -161,7 +158,7 @@ app.post('/interactions', verifyKeyMiddleware(process.env.PUBLIC_KEY), async fun
   return res.status(400).json({ error: 'unknown interaction type' });
 });
 
-export async function sendMessageToChannel(channelId, message) {
+export async function send_message_to_channel(channelId, message) {
   const DISCORD_TOKEN = process.env.DISCORD_TOKEN; // Ensure the bot token is available via environment variables
   const url = `https://discord.com/api/v10/channels/${channelId}/messages`;
   console.log(client.guilds.cache.map(guild => guild.id));
