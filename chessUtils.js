@@ -148,8 +148,7 @@ export function getRandomLoseMsg(timeControl, username, ratingChange, newRating,
             `It’s sad trombone time 🎺, because **${username}** just dropped ${ratingChange} in a ${timeControl} game.`,
             `**${username}** be slurping on that loser juice 🧃. Filled with at least ${ratingChange} in a ${timeControl} game, this mixture will guarantee everyone knows you’ve lost your match.`,
             `No need for a funeral, **${username}** already dug their own grave 🪦. The will? A ${ratingChange} in a ${timeControl} game. New rating: ${newRating}`,
-            `**${username}** displeased the Hokie Bird 🐦 by having a loss in a ${timeControl} game. What are you, a UVA student? New rating: ${newRating}`,
-            `Tal once said "To play for a draw, at any rate with white, is to some degree a crime against chess."\nSo someone needs to arrest **${username}**`
+            `**${username}** displeased the Hokie Bird 🐦 by having a loss in a ${timeControl} game. What are you, a UVA student? New rating: ${newRating}`
         ];
     }
     return randomLoseMessages[Math.floor(Math.random() * randomLoseMessages.length)] + `\nCheck out the game here! ${gameUrl}`;
@@ -169,7 +168,8 @@ export function getRandomDrawMsg(timeControl, username, ratingChange, newRating,
         `A draw? Really? **${username}** out here making sure nobody has fun. New rating: ${newRating}.`,
         `Congratulations to **${username}**, who managed to snatch a stalemate from the jaws of defeat with a rating of ${newRating} from a ${timeControl} game.!`,
         `Well, **${username}** didn’t win, but at least they didn’t lose either. Current rating: ${newRating}.`,
-        `At least you didn’t lose your king, **${username}**. The monarchy goes on, with a rating of ${newRating}.`
+        `At least you didn’t lose your king, **${username}**. The monarchy goes on, with a rating of ${newRating}.`,
+        `Tal once said "To play for a draw, at any rate with white, is to some degree a crime against chess."\nSo someone needs to arrest **${username}**`
     ];
     return randomDrawMessages[Math.floor(Math.random() * randomDrawMessages.length)] + `\nCheck out the game here! ${gameUrl}`;
 }
