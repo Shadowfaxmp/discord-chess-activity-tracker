@@ -1,3 +1,4 @@
+//Array to hold chess.com usernames
 export const clubMembers = [
     "ShadowfaxKnight",
     "dannyjedi",
