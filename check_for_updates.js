@@ -1,19 +1,33 @@
-import {get_chess_stats, getRandomWinMsg, getRandomLoseMsg, get_most_recent_game, get_game_result, getRandomDrawMsg} from "./chessUtils.js";
-import {send_message_to_channel} from "./app.js";
+import {fetchUserStats, getRandomWinMsg, getRandomLoseMsg, fetchUserMostRecentGame, get_game_result, getRandomDrawMsg} from "./chessUtils.js";
+import {sendMessageToChannel} from "./app.js";
 import * as console from "node:console";
-import { clubMembers } from "./club_members.js";
-export async function check_for_updates(channel_id){
+
+const club_members = [
+    "ShadowfaxKnight",
+    "dannyjedi",
+    "Victor198",
+    "Ry8ot",
+    "rompom21",
+    "Mathperson2015",
+    "oThoron",
+    "MrJoeMcDonald",
+    "mewtationdoodle",
+    "bmr142",
+    "kimaniknight",
+    "TheRealRadzTurtlez",
+]
+export async function sendUpdateMessages(channel_id) {
     console.log('Sending updates...');
 
     let userRatingsMap = await get_most_recent_stats();
     // Function to check for updates
     const checkAndSendUpdates = async () => {
 
-        for (const username of clubMembers) {
+        for (const username of club_members) {
             try {
                 let most_recent_game = "";
-                const profile = await get_chess_stats(username);
-                const mostRecentGame = await get_most_recent_game(username);
+                const profile = await fetchUserStats(username);
+                const mostRecentGame = await fetchUserMostRecentGame(username);
 
                 if (mostRecentGame && mostRecentGame.url) {
                     most_recent_game = mostRecentGame.url;
@@ -49,14 +63,14 @@ export async function check_for_updates(channel_id){
 
                     const game_result = get_game_result(username, mostRecentGame);
 
-                    if (game_result.result === "loss") {
+                    if (game_result === "loss") {
                         console.log(`${username} lost ${Math.abs(ratingChange)} points in ${time_control}`);
-                        await send_message_to_channel(channel_id, getRandomLoseMsg(time_control, username, ratingChange, new_rating, mostRecentGame.url, game_result.loss_type));
-                    } else if (game_result.result === "win") {
+                        await sendMessageToChannel(channel_id, getRandomLoseMsg(time_control, username, ratingChange, new_rating, mostRecentGame.url));
+                    } else if (game_result === "win") {
                         console.log(`${username} gained ${ratingChange} points in ${time_control}`);
-                        await send_message_to_channel(channel_id, getRandomWinMsg(time_control, username, ratingChange, new_rating, mostRecentGame.url, game_result.loss_type));
-                    } else if (game_result.result === "draw") {
-                        await send_message_to_channel(channel_id, getRandomDrawMsg(time_control, username, ratingChange, new_rating, mostRecentGame.url));
+                        await sendMessageToChannel(channel_id, getRandomWinMsg(time_control, username, ratingChange, new_rating, mostRecentGame.url));
+                    } else if (game_result === "draw") {
+                        await sendMessageToChannel(channel_id, getRandomDrawMsg(time_control, username, ratingChange, new_rating, mostRecentGame.url));
                     }
 
                     // Update hashmap with new ratings
@@ -80,11 +94,11 @@ async function get_most_recent_stats() {
 
     let user_rating_map = new Map();
 
-    for (const user of clubMembers) {
+    for (const user of club_members) {
         let most_recent_game = ``; // Default to 0 in case of an error
 
         try {
-            const mostRecentGame = await get_most_recent_game(user);
+            const mostRecentGame = await fetchUserMostRecentGame(user);
             if (mostRecentGame && mostRecentGame.url) {
                 most_recent_game = mostRecentGame.url;
             }
@@ -94,7 +108,7 @@ async function get_most_recent_stats() {
 
         let userStats;
         try {
-            userStats = await get_chess_stats(user);
+            userStats = await fetchUserStats(user);
         } catch (error) {
             console.error(`Error fetching stats for ${user}:`, error);
             continue; // Skip this user if stats can't be fetched
