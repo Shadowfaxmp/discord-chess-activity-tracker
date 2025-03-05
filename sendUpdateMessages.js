@@ -13,6 +13,8 @@ const club_members = [
     "MrJoeMcDonald",
     "mewtationdoodle",
     "bmr142",
+    "kimaniknight",
+    "TheRealRadzTurtlez",
 ]
 export async function sendUpdateMessages(channel_id) {
     console.log('Sending updates...');
