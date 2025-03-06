@@ -89,7 +89,7 @@ function format_message(message, game_url) {
         embeds: [
             {
                 title: message,
-                description: "Click below to view game:",
+                description: "Check out the game here!",
                 color: 0x630031
             }
         ],
