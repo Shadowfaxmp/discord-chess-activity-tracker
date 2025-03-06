@@ -31,7 +31,7 @@ export function getRandomWinMsg(timeControl, username, ratingChange, newRating, 
         ];
     }
 
-    return format_message(randomWinMessages[Math.floor(Math.random() * randomWinMessages.length)], gameUrl)
+    return format_message(randomWinMessages[Math.floor(Math.random() * randomWinMessages.length)], gameUrl, username)
 }
 
 export function getRandomLoseMsg(timeControl, username, ratingChange, newRating, gameUrl, loss_type) {
@@ -60,7 +60,7 @@ export function getRandomLoseMsg(timeControl, username, ratingChange, newRating,
         ];
     }
 
-    return format_message(randomLoseMessages[Math.floor(Math.random() * randomLoseMessages.length)], gameUrl);
+    return format_message(randomLoseMessages[Math.floor(Math.random() * randomLoseMessages.length)], gameUrl, username);
 }
 
 export function getRandomDrawMsg(timeControl, username, ratingChange, newRating, gameUrl) {
@@ -81,10 +81,11 @@ export function getRandomDrawMsg(timeControl, username, ratingChange, newRating,
         `Tal once said "To play for a draw, at any rate with white, is to some degree a crime against chess."\nSo someone needs to arrest **${username}**`
     ];
 
-    return format_message(randomDrawMessages[Math.floor(Math.random() * randomDrawMessages.length)], gameUrl);
+    return format_message(randomDrawMessages[Math.floor(Math.random() * randomDrawMessages.length)], gameUrl, username);
 }
 
-function format_message(message, game_url) {
+function format_message(message, game_url, username) {
+    const profile_url = `https://www.chess.com/member/${username.toLowerCase()}`;
     return JSON.stringify({
         embeds: [
             {
@@ -102,6 +103,12 @@ function format_message(message, game_url) {
                         label: "View Game",
                         style: 5,      // 5 is the 'Link' style
                         url: game_url   // The actual link
+                    },
+                    {
+                        type: 2,
+                        label: `View ${username}'s profile`,
+                        style: 5,
+                        url: profile_url
                     }
                 ]
             }
