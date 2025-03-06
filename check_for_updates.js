@@ -1,4 +1,5 @@
-import {get_chess_stats, getRandomWinMsg, getRandomLoseMsg, get_most_recent_game, get_game_result, getRandomDrawMsg} from "./chessUtils.js";
+import {get_chess_stats, get_most_recent_game, get_game_result} from "./chessUtils.js";
+import {getRandomWinMsg, getRandomLoseMsg, getRandomDrawMsg} from "./messages.js";
 import {send_message_to_channel} from "./app.js";
 import * as console from "node:console";
 import { clubMembers } from "./club_members.js";
