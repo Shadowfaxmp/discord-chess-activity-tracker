@@ -30,15 +30,8 @@ export function getRandomWinMsg(timeControl, username, ratingChange, newRating, 
             `Off with their head 🔪! **${username}** just sent another king to the guillotine, gaining ${ratingChange} points in ${timeControl}. New rating: ${newRating}. Vive la révolution!`
         ];
     }
-    return JSON.stringify({
-        embeds: [
-            {
-                title: randomWinMessages[Math.floor(Math.random() * randomWinMessages.length)],
-                description: `Check out the game here! ${gameUrl}`,
-                color: 0x630031  // 0x notation for hex color
-            }
-        ]
-    });
+
+    return format_message(randomWinMessages[Math.floor(Math.random() * randomWinMessages.length)], gameUrl)
 }
 
 export function getRandomLoseMsg(timeControl, username, ratingChange, newRating, gameUrl, loss_type) {
@@ -66,15 +59,8 @@ export function getRandomLoseMsg(timeControl, username, ratingChange, newRating,
             `**${username}** displeased the Hokie Bird 🐦 by having a loss in a ${timeControl} game. What are you, a UVA student? New rating: ${newRating}`
         ];
     }
-    return JSON.stringify({
-        embeds: [
-            {
-                title: randomLoseMessages[Math.floor(Math.random() * randomLoseMessages.length)],
-                description: `Check out the game here! ${gameUrl}`,
-                color: 0x630031  // 0x notation for hex color
-            }
-        ]
-    });
+
+    return format_message(randomLoseMessages[Math.floor(Math.random() * randomLoseMessages.length)], gameUrl);
 }
 
 export function getRandomDrawMsg(timeControl, username, ratingChange, newRating, gameUrl) {
@@ -94,12 +80,30 @@ export function getRandomDrawMsg(timeControl, username, ratingChange, newRating,
         `At least you didn’t lose your king, **${username}**. The monarchy goes on, with a rating of ${newRating}.`,
         `Tal once said "To play for a draw, at any rate with white, is to some degree a crime against chess."\nSo someone needs to arrest **${username}**`
     ];
+
+    return format_message(randomDrawMessages[Math.floor(Math.random() * randomDrawMessages.length)], gameUrl);
+}
+
+function format_message(message, game_url) {
     return JSON.stringify({
         embeds: [
             {
-                title: randomDrawMessages[Math.floor(Math.random() * randomDrawMessages.length)],
-                description: `Check out the game here! ${gameUrl}`,
-                color: 0x630031  // 0x notation for hex color
+                title: message,
+                description: "Click below to view game:",
+                color: 0x630031
+            }
+        ],
+        components: [
+            {
+                type: 1, // An action row
+                components: [
+                    {
+                        type: 2,       // A button
+                        label: "View Game",
+                        style: 5,      // 5 is the 'Link' style
+                        url: game_url   // The actual link
+                    }
+                ]
             }
         ]
     });
