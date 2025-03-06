@@ -161,8 +161,9 @@ app.post('/interactions', verifyKeyMiddleware(process.env.PUBLIC_KEY), async fun
 export async function send_message_to_channel(channelId, message) {
   const DISCORD_TOKEN = process.env.DISCORD_TOKEN; // Ensure the bot token is available via environment variables
   const url = `https://discord.com/api/v10/channels/${channelId}/messages`;
-  console.log(client.guilds.cache.map(guild => guild.id));
+
   console.log(`Attempting to send message to channel: ${channelId}`);
+
   try {
     const response = await fetch(url, {
       method: 'POST',
@@ -170,9 +171,7 @@ export async function send_message_to_channel(channelId, message) {
         'Authorization': `Bot ${DISCORD_TOKEN}`,
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({
-        content: message,
-      }),
+      body: message,
     });
 
     if (!response.ok) {
@@ -185,6 +184,7 @@ export async function send_message_to_channel(channelId, message) {
     console.error('Error in sendMessageToChannel:', error);
   }
 }
+
 
 app.listen(PORT, () => {
   console.log('Listening on port', PORT);

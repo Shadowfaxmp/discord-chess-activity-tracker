@@ -2,6 +2,11 @@ import {get_chess_stats, getRandomWinMsg, getRandomLoseMsg, get_most_recent_game
 import {send_message_to_channel} from "./app.js";
 import * as console from "node:console";
 import { clubMembers } from "./club_members.js";
+
+
+
+
+
 export async function check_for_updates(channel_id){
     console.log('Sending updates...');
 

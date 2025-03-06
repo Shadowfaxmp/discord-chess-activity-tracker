@@ -104,7 +104,7 @@ export function getRandomWinMsg(timeControl, username, ratingChange, newRating, 
     } else if(loss_type === "resigned") {
         randomWinMessages = [
             `Dang! **${username}** beat their opponent so hard they rage quit! **${username}** gained ${ratingChange} points and now has a ${newRating} rating`,
-            `What's this? A rage quit? **${username}** just made their opponent rage quit with their amazing accuracy. They now have a ${newRating} rating after gaining ${ratingChange} points!`,
+            `What's this? A rage quit? **${username}** just made their opponent resign with their amazing accuracy. They now have a ${newRating} rating after gaining ${ratingChange} points!`,
             `**${username}** was beating their opponent so hard they decided to resign. New rating is ${newRating} after gaining ${ratingChange} points!`,
             `GothamChess is disappointed, **${username}** just resigned their ${timeControl} game losing ${ratingChange} points. New Rating: ${newRating} after gaining ${ratingChange}`,
         ]
@@ -123,7 +123,15 @@ export function getRandomWinMsg(timeControl, username, ratingChange, newRating, 
             `Off with their head 🔪! **${username}** just sent another king to the guillotine, gaining ${ratingChange} points in ${timeControl}. New rating: ${newRating}. Vive la révolution!`
         ];
     }
-    return randomWinMessages[Math.floor(Math.random() * randomWinMessages.length)] + `\nCheck out the game here! ${gameUrl}`;
+    return JSON.stringify({
+        embeds: [
+            {
+                title: randomWinMessages[Math.floor(Math.random() * randomWinMessages.length)],
+                description: `Check out the game here! ${gameUrl}`,
+                color: 0x0099ff  // 0x notation for hex color
+            }
+        ]
+    });
 }
 
 export function getRandomLoseMsg(timeControl, username, ratingChange, newRating, gameUrl, loss_type) {
@@ -151,7 +159,15 @@ export function getRandomLoseMsg(timeControl, username, ratingChange, newRating,
             `**${username}** displeased the Hokie Bird 🐦 by having a loss in a ${timeControl} game. What are you, a UVA student? New rating: ${newRating}`
         ];
     }
-    return randomLoseMessages[Math.floor(Math.random() * randomLoseMessages.length)] + `\nCheck out the game here! ${gameUrl}`;
+    return JSON.stringify({
+        embeds: [
+            {
+                title: randomLoseMessages[Math.floor(Math.random() * randomLoseMessages.length)],
+                description: `Check out the game here! ${gameUrl}`,
+                color: 0x0099ff  // 0x notation for hex color
+            }
+        ]
+    });
 }
 
 export function getRandomDrawMsg(timeControl, username, ratingChange, newRating, gameUrl) {
@@ -171,5 +187,13 @@ export function getRandomDrawMsg(timeControl, username, ratingChange, newRating,
         `At least you didn’t lose your king, **${username}**. The monarchy goes on, with a rating of ${newRating}.`,
         `Tal once said "To play for a draw, at any rate with white, is to some degree a crime against chess."\nSo someone needs to arrest **${username}**`
     ];
-    return randomDrawMessages[Math.floor(Math.random() * randomDrawMessages.length)] + `\nCheck out the game here! ${gameUrl}`;
+    return JSON.stringify({
+        embeds: [
+            {
+                title: randomDrawMessages[Math.floor(Math.random() * randomDrawMessages.length)],
+                description: `Check out the game here! ${gameUrl}`,
+                color: 0x0099ff  // 0x notation for hex color
+            }
+        ]
+    });
 }
