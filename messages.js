@@ -60,7 +60,7 @@ export function getRandomLoseMsg(timeControl, username, ratingChange, newRating,
         ];
     }
 
-    return format_message(randomLoseMessages[Math.floor(Math.random() * randomLoseMessages.length)], gameUrl, username);
+    return format_message(randomLoseMessages[Math.floor(Math.random() * randomLoseMessages.length)], gameUrl, username, 0xCF4420);
 }
 
 export function getRandomDrawMsg(timeControl, username, ratingChange, newRating, gameUrl) {
@@ -81,17 +81,17 @@ export function getRandomDrawMsg(timeControl, username, ratingChange, newRating,
         `Tal once said "To play for a draw, at any rate with white, is to some degree a crime against chess."\nSo someone needs to arrest **${username}**`
     ];
 
-    return format_message(randomDrawMessages[Math.floor(Math.random() * randomDrawMessages.length)], gameUrl, username);
+    return format_message(randomDrawMessages[Math.floor(Math.random() * randomDrawMessages.length)], gameUrl, username, 0xFFFFFF);
 }
 
-function format_message(message, game_url, username) {
+function format_message(message, game_url, username, color = 0x630031) {
     const profile_url = `https://www.chess.com/member/${username.toLowerCase()}`;
     return JSON.stringify({
         embeds: [
             {
                 title: message,
                 description: "Check out the game here!",
-                color: 0x630031
+                color: color
             }
         ],
         components: [
