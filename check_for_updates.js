@@ -1,4 +1,4 @@
-import {get_chess_stats, get_most_recent_game, get_game_result} from "./chessUtils.js";
+import {get_chess_stats, get_most_recent_game, get_game_result} from "./chess_utils.js";
 import {getRandomWinMsg, getRandomLoseMsg, getRandomDrawMsg} from "./messages.js";
 import {send_message_to_channel} from "./app.js";
 import * as console from "node:console";
@@ -57,12 +57,12 @@ export async function check_for_updates(channel_id){
 
                     if (game_result.result === "loss") {
                         console.log(`${username} lost ${Math.abs(ratingChange)} points in ${time_control}`);
-                        await send_message_to_channel(channel_id, getRandomLoseMsg(time_control, username, ratingChange, new_rating, mostRecentGame.url, game_result.loss_type));
+                        await send_message_to_channel(channel_id, getRandomLoseMsg(time_control, username, ratingChange, new_rating, mostRecentGame, game_result.loss_type));
                     } else if (game_result.result === "win") {
                         console.log(`${username} gained ${ratingChange} points in ${time_control}`);
-                        await send_message_to_channel(channel_id, getRandomWinMsg(time_control, username, ratingChange, new_rating, mostRecentGame.url, game_result.loss_type));
+                        await send_message_to_channel(channel_id, getRandomWinMsg(time_control, username, ratingChange, new_rating, mostRecentGame, game_result.loss_type));
                     } else if (game_result.result === "draw") {
-                        await send_message_to_channel(channel_id, getRandomDrawMsg(time_control, username, ratingChange, new_rating, mostRecentGame.url));
+                        await send_message_to_channel(channel_id, getRandomDrawMsg(time_control, username, ratingChange, new_rating, mostRecentGame));
                     }
 
                     // Update hashmap with new ratings
