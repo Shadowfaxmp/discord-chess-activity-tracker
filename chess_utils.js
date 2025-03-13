@@ -89,3 +89,54 @@ export function get_game_result(player, game) {
         };
     }
 }
+
+function extractMoveText(pgn) {
+    const parts = pgn.split('\n\n');
+    return parts.length > 1 ? parts.slice(1).join('\n').trim() : pgn.trim();
+}
+
+/**
+ * Parses a PGN string to find the last move number in the game.
+ *
+ * @param {string} pgn - The full PGN string.
+ * @returns {number} - The final move number in the game.
+ */
+export function getGameLengthFromPGN(pgn) {
+    // Extract the moves section from the PGN.
+    const moveText = extractMoveText(pgn);
+
+    // Remove annotations/comments inside curly braces (even multiline).
+    const cleanedMoveText = moveText.replace(/\{[\s\S]+?\}/g, '');
+
+    // Regex to match move numbers: matches either "1." (white move) or "1..." (black move).
+    const regex = /(\d+)\.(\.\.)?/g;
+    let lastMoveNumber = 0;
+    let match;
+
+    // Loop through all matches and capture the number.
+    while ((match = regex.exec(cleanedMoveText)) !== null) {
+        lastMoveNumber = parseInt(match[1], 10);
+    }
+
+    return lastMoveNumber;
+}
+
+export function getOpeningName(url) {
+    // This regex matches the substring after '/openings/' up to the first "-<digit>"
+    const regex = /\/openings\/(.*?)(?=-\d)/;
+    const match = url.match(regex);
+
+    let openingSlug;
+    if (match && match[1]) {
+        openingSlug = match[1];
+    } else {
+        // Fallback: if the pattern isn't found, take everything after '/openings/'
+        const parts = url.split('/openings/');
+        openingSlug = parts[1] || "";
+    }
+
+    // Replace hyphens with spaces to format the opening name properly.
+    const openingName = openingSlug.split('-').join(' ');
+
+    return openingName.trim();
+}
