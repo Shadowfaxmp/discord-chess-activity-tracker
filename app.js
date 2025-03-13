@@ -3,7 +3,7 @@ import 'dotenv/config';
 import express from 'express';
 import { InteractionType, InteractionResponseType, MessageComponentTypes, verifyKeyMiddleware,} from 'discord-interactions';
 import {getRandomEmoji} from './utils.js';
-import {get_chess_profile, get_most_recent_game} from "./chessUtils.js";
+import {get_chess_profile, get_most_recent_game} from "./chess_utils.js";
 import {check_for_updates} from './check_for_updates.js';
 
 // Create an express app
