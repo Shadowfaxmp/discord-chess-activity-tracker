@@ -35,6 +35,7 @@ export function getRandomWinMsg(timeControl, username, ratingChange, newRating, 
     return format_message(randomWinMessages[Math.floor(Math.random() * randomWinMessages.length)], game, username, 0x630031, newRating)
 }
 
+
 export function getRandomLoseMsg(timeControl, username, ratingChange, newRating, game, loss_type) {
     console.log(loss_type)
     let randomLoseMessages;
