@@ -14,4 +14,5 @@ export const clubMembers = [
     "BurpingBishop",
     "kimaniknight",
     "bkeith0217",
+    "seanb354",
 ];
