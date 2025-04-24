@@ -6,8 +6,6 @@ import { clubMembers } from "./club_members.js";
 
 
 
-
-
 export async function check_for_updates(channel_id){
     console.log('Sending updates...');
 

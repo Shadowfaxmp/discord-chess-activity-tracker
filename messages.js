@@ -1,4 +1,4 @@
-import {getGameLengthFromPGN, getOpeningName} from "./chess_utils.js";
+import {getEcoUrl, getGameLengthFromPGN, getOpeningName} from "./chess_utils.js";
 
 export function getRandomWinMsg(timeControl, username, ratingChange, newRating, game, loss_type) {
     console.log(loss_type)
@@ -91,7 +91,7 @@ function game_info(game, username, newRating) {
 
     //const accuracy = username === game.white.username ? game.accuracies.white : game.accuracies.black;
     return `
-        > - Opening: ${getOpeningName(game.eco)}
+        > - Opening: ${getOpeningName(getEcoUrl(game))}
         > - Number of moves: ${getGameLengthFromPGN(game.pgn)}
         > - New Rating: ${newRating}
         ### Click below to see analysis of the game!`;
@@ -105,7 +105,7 @@ function format_message(message, game, username, color = 0x630031, newRating) {
             {
                 title: message,
                 description: game_info(game, username, newRating),
-                color: color
+                color: color,
             }
         ],
         components: [
@@ -128,7 +128,7 @@ function format_message(message, game, username, color = 0x630031, newRating) {
                         type: 2,
                         label: `See Opening`,
                         style: 5,
-                        url: game.eco
+                        url: getEcoUrl(game)
                     }
                 ]
             }

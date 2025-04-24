@@ -122,21 +122,36 @@ export function getGameLengthFromPGN(pgn) {
 }
 
 export function getOpeningName(url) {
-    // This regex matches the substring after '/openings/' up to the first "-<digit>"
-    const regex = /\/openings\/(.*?)(?=-\d)/;
-    const match = url.match(regex);
+    try {
+        // This regex matches the substring after '/openings/' up to the first "-<digit>"
+        const regex = /\/openings\/(.*?)(?=-\d)/;
+        const match = url.match(regex);
 
-    let openingSlug;
-    if (match && match[1]) {
-        openingSlug = match[1];
-    } else {
-        // Fallback: if the pattern isn't found, take everything after '/openings/'
-        const parts = url.split('/openings/');
-        openingSlug = parts[1] || "";
+        let openingSlug;
+        if (match && match[1]) {
+            openingSlug = match[1];
+        } else {
+            // Fallback: if the pattern isn't found, take everything after '/openings/'
+            const parts = url.split('/openings/');
+            openingSlug = parts[1] || "";
+        }
+
+        // Replace hyphens with spaces to format the opening name properly.
+        const openingName = openingSlug.split('-').join(' ');
+
+        return openingName.trim();
+    } catch (error) {
+        console.log(`Error getting opening type:`);
+        console.log(error);
+        return `unknown`;
+    }
+}
+
+export function getEcoUrl(game) {
+    if (!game || typeof game.pgn !== 'string') {
+        return '';
     }
 
-    // Replace hyphens with spaces to format the opening name properly.
-    const openingName = openingSlug.split('-').join(' ');
-
-    return openingName.trim();
+    const match = game.pgn.match(/\[ECOUrl\s+"(.*?)"\]/);
+    return match ? match[1] : '';
 }
