@@ -10,9 +10,7 @@ export const clubMembers = [
     "MrJoeMcDonald",
     "mewtationdoodle",
     "bmr142",
-    "TheRealRadzTurtlez",
     "BurpingBishop",
-    "kimaniknight",
     "bkeith0217",
     "seanb354",
 ];
