@@ -9,7 +9,7 @@ export const clubMembers = [
     "oThoron",
     "MrJoeMcDonald",
     "mewtationdoodle",
-    "bmr142",
+    //"bmr142",
     "BurpingBishop",
     "bkeith0217",
     "seanb354",
