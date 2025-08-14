@@ -1,8 +1,8 @@
-import {get_chess_stats, get_most_recent_game, get_game_result} from "./chess_utils.js";
+import {get_chess_stats, get_most_recent_game, get_game_result, get_lichess_stats, get_lichess_most_recent_game} from "./chess_utils.js";
 import {getRandomWinMsg, getRandomLoseMsg, getRandomDrawMsg} from "./messages.js";
 import {send_message_to_channel} from "./app.js";
 import * as console from "node:console";
-import { clubMembers } from "./club_members.js";
+import { clubMembers, lichessClubMembers } from "./club_members.js";
 
 
 
@@ -10,6 +10,7 @@ export async function check_for_updates(channel_id){
     console.log('Sending updates...');
 
     let userRatingsMap = await get_most_recent_stats();
+    let lichessRatingsMap = await get_most_recent_lichess_stats();
     // Function to check for updates
     const checkAndSendUpdates = async () => {
 
@@ -71,6 +72,61 @@ export async function check_for_updates(channel_id){
                 console.error(`Error processing ${username}:`, error);
             }
         }
+
+        for (const username of lichessClubMembers) {
+            try {
+                let most_recent_game = "";
+                const profile = await get_lichess_stats(username);
+                const mostRecentGame = await get_lichess_most_recent_game(username);
+
+                if (mostRecentGame && mostRecentGame.url) {
+                    most_recent_game = mostRecentGame.url;
+                }
+
+                const newRatings = {
+                    chess_bullet: profile?.perfs?.bullet?.rating || 0,
+                    chess_blitz: profile?.perfs?.blitz?.rating || 0,
+                    chess_rapid: profile?.perfs?.rapid?.rating || 0,
+                    recent_game: most_recent_game,
+                };
+
+                const lastRating = lichessRatingsMap.get(username);
+
+                if (!lastRating || newRatings.recent_game !== lastRating.recent_game) {
+
+                    console.log(`New Lichess game detected for ${username}`);
+                    const time_control = mostRecentGame?.time_class;
+                    let ratingChange = 0;
+                    let new_rating = 0;
+
+                    if (time_control === "rapid") {
+                        ratingChange = newRatings.chess_rapid - (lastRating?.chess_rapid || 0);
+                        new_rating = newRatings.chess_rapid;
+                    } else if (time_control === "blitz") {
+                        ratingChange = newRatings.chess_blitz - (lastRating?.chess_blitz || 0);
+                        new_rating = newRatings.chess_blitz;
+                    } else if (time_control === "bullet") {
+                        ratingChange = newRatings.chess_bullet - (lastRating?.chess_bullet || 0);
+                        new_rating = newRatings.chess_bullet;
+                    }
+
+                    const game_result = get_game_result(username, mostRecentGame);
+
+                    if (game_result.result === "loss") {
+                        await send_message_to_channel(channel_id, getRandomLoseMsg(time_control, username, ratingChange, new_rating, mostRecentGame, game_result.loss_type));
+                    } else if (game_result.result === "win") {
+                        await send_message_to_channel(channel_id, getRandomWinMsg(time_control, username, ratingChange, new_rating, mostRecentGame, game_result.loss_type));
+                    } else if (game_result.result === "draw") {
+                        await send_message_to_channel(channel_id, getRandomDrawMsg(time_control, username, ratingChange, new_rating, mostRecentGame));
+                    }
+
+                    lichessRatingsMap.set(username, newRatings);
+                }
+
+            } catch (error) {
+                console.error(`Error processing lichess user ${username}:`, error);
+            }
+        }
     };
 
     await checkAndSendUpdates(); // Initial check
@@ -110,6 +166,41 @@ async function get_most_recent_stats() {
             chess_blitz: userStats?.chess_blitz?.last?.rating || 0,
             chess_rapid: userStats?.chess_rapid?.last?.rating || 0,
             recent_game: most_recent_game
+        };
+
+        user_rating_map.set(user, userRatings);
+    }
+    return user_rating_map;
+}
+
+async function get_most_recent_lichess_stats() {
+    let user_rating_map = new Map();
+
+    for (const user of lichessClubMembers) {
+        let most_recent_game = ``;
+
+        try {
+            const mostRecentGame = await get_lichess_most_recent_game(user);
+            if (mostRecentGame && mostRecentGame.url) {
+                most_recent_game = mostRecentGame.url;
+            }
+        } catch (error) {
+            console.error(`Error fetching most recent Lichess game for ${user}:`, error);
+        }
+
+        let userStats;
+        try {
+            userStats = await get_lichess_stats(user);
+        } catch (error) {
+            console.error(`Error fetching Lichess stats for ${user}:`, error);
+            continue;
+        }
+
+        const userRatings = {
+            chess_bullet: userStats?.perfs?.bullet?.rating || 0,
+            chess_blitz: userStats?.perfs?.blitz?.rating || 0,
+            chess_rapid: userStats?.perfs?.rapid?.rating || 0,
+            recent_game: most_recent_game,
         };
 
         user_rating_map.set(user, userRatings);

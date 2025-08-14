@@ -15,4 +15,7 @@ export const clubMembers = [
     "seanb354",
 ];
 
-export const lichessClubMembers = []
+// Array to hold lichess.org usernames
+export const lichessClubMembers = [
+    // Add Lichess usernames here
+];

@@ -99,39 +99,48 @@ function game_info(game, username, newRating) {
 
 function format_message(message, game, username, color = 0x630031, newRating) {
     console.log(`Format Message: ${message}`);
-    const profile_url = `https://www.chess.com/member/${username.toLowerCase()}`;
+    const profile_url = game.site === 'lichess'
+        ? `https://lichess.org/@/${username}`
+        : `https://www.chess.com/member/${username.toLowerCase()}`;
+
+    const buttons = [
+        {
+            type: 2,
+            label: "Game Link",
+            style: 5,
+            url: game.url,
+        },
+        {
+            type: 2,
+            label: `View ${username}'s Profile`,
+            style: 5,
+            url: profile_url,
+        },
+    ];
+
+    const openingUrl = getEcoUrl(game);
+    if (openingUrl) {
+        buttons.push({
+            type: 2,
+            label: `See Opening`,
+            style: 5,
+            url: openingUrl,
+        });
+    }
+
     return JSON.stringify({
         embeds: [
             {
                 title: message,
                 description: game_info(game, username, newRating),
                 color: color,
-            }
+            },
         ],
         components: [
             {
-                type: 1, // An action for the buttons
-                components: [
-                    {
-                        type: 2,       // A button
-                        label: "Game Link",
-                        style: 5,      // 5 is the 'Link' style
-                        url: game.url   // The actual link
-                    },
-                    {
-                        type: 2,
-                        label: `View ${username}'s Profile`,
-                        style: 5,
-                        url: profile_url
-                    },
-                    {
-                        type: 2,
-                        label: `See Opening`,
-                        style: 5,
-                        url: getEcoUrl(game)
-                    }
-                ]
-            }
-        ]
+                type: 1,
+                components: buttons,
+            },
+        ],
     });
 }
