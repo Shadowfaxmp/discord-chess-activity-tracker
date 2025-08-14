@@ -14,3 +14,5 @@ export const clubMembers = [
     "bkeith0217",
     "seanb354",
 ];
+
+export const lichessClubMembers = []
