@@ -25,13 +25,15 @@ export async function get_chess_recent_games(userName) {
     }
 }
 
-    export async function get_most_recent_game(username) {
+export async function get_most_recent_game(username) {
     const mostRecentGames = await get_chess_recent_games(username);
 
     if (mostRecentGames.games && mostRecentGames.games.length > 0) {
-        return mostRecentGames.games[mostRecentGames.games.length - 1]; // Get last game in the list
+        const game = mostRecentGames.games[mostRecentGames.games.length - 1]; // Get last game in the list
+        game.site = 'chess.com';
+        return game;
     } else {
-        return ``;
+        return null;
     }
 }
 
@@ -46,6 +48,76 @@ export async function get_chess_profile(username) {
     const url = `https://api.chess.com/pub/player/${username.toLowerCase()}`;
 
     return await getResponse(url);
+}
+
+function mapLichessStatus(status) {
+    switch (status) {
+        case 'timeout':
+        case 'outoftime':
+            return 'timeout';
+        case 'resign':
+            return 'resigned';
+        case 'mate':
+            return 'checkmated';
+        case 'aborted':
+            return 'abandoned';
+        default:
+            return status;
+    }
+}
+
+export async function get_lichess_most_recent_game(username) {
+    const url = `https://lichess.org/api/games/user/${username}?max=1&opening=true&pgnInJson=true&sort=dateDesc`;
+    try {
+        const response = await fetch(url, { headers: { 'Accept': 'application/x-ndjson' } });
+        const text = await response.text();
+        const line = text.trim().split('\n')[0];
+        if (!line) {
+            return null;
+        }
+        const data = JSON.parse(line);
+        const { players, id, pgn, speed, winner, status } = data;
+        let whiteResult, blackResult;
+        if (winner === 'white') {
+            whiteResult = 'win';
+            blackResult = mapLichessStatus(status);
+        } else if (winner === 'black') {
+            whiteResult = mapLichessStatus(status);
+            blackResult = 'win';
+        } else {
+            whiteResult = 'draw';
+            blackResult = 'draw';
+        }
+
+        return {
+            site: 'lichess',
+            url: `https://lichess.org/${id}`,
+            pgn: pgn,
+            time_class: speed,
+            white: {
+                username: players?.white?.user?.name || 'anonymous',
+                result: whiteResult,
+            },
+            black: {
+                username: players?.black?.user?.name || 'anonymous',
+                result: blackResult,
+            },
+        };
+    } catch (error) {
+        console.error(`Error fetching recent Lichess game for ${username}:`, error);
+        return null;
+    }
+}
+
+export async function get_lichess_stats(userName) {
+    const url = `https://lichess.org/api/user/${userName}`;
+    try {
+        const response = await fetch(url);
+        return await response.json();
+    } catch (error) {
+        console.error(`Error fetching Lichess stats for ${userName}:`, error);
+        return null;
+    }
 }
 
 async function getResponse(link) {
