@@ -3,13 +3,40 @@ import 'dotenv/config';
 import express from 'express';
 import { InteractionType, InteractionResponseType, MessageComponentTypes, verifyKeyMiddleware,} from 'discord-interactions';
 import {getRandomEmoji} from './utils.js';
-import {get_chess_profile, get_most_recent_game} from "./chess_utils.js";
+import {get_chess_profile, get_most_recent_game, get_chess_stats, get_games_in_last_days, get_game_result} from "./chess_utils.js";
+import {clubMembers} from './club_members.js';
 import {check_for_updates} from './check_for_updates.js';
 
 // Create an express app
 const app = express();
 // Get port, or default to 3000
 const PORT = process.env.PORT;
+
+async function buildLeaderboard(metric, period) {
+  const daysMap = { day: 1, week: 7, month: 30 };
+  const days = daysMap[period] || 7;
+
+  const entries = await Promise.all(clubMembers.map(async (username) => {
+    if (metric === 'rating') {
+      const stats = await get_chess_stats(username);
+      const rating = stats?.chess_rapid?.last?.rating || 0;
+      return { username, value: rating };
+    } else {
+      const games = await get_games_in_last_days(username, days);
+      if (metric === 'games_won') {
+        const wins = games.filter(g => get_game_result(username, g).result === 'win').length;
+        return { username, value: wins };
+      }
+      return { username, value: games.length };
+    }
+  }));
+
+  entries.sort((a, b) => b.value - a.value);
+  const title = metric.replace('_', ' ');
+  const header = `Leaderboard - ${title} (${period})`;
+  const lines = entries.map((e, idx) => `${idx + 1}. ${e.username} - ${e.value}`);
+  return `**${header}**\n${lines.join('\n')}`;
+}
 
 /**
  * Interactions endpoint URL where Discord will send HTTP requests
@@ -94,6 +121,18 @@ app.post('/interactions', verifyKeyMiddleware(process.env.PUBLIC_KEY), async fun
         data: {
           // Fetches a random emoji to send from a helper function
           content: `Set channel succeeded`,
+        },
+      });
+    }
+
+    if (name === 'leaderboard') {
+      const metricOption = data.options?.find(o => o.name === 'metric')?.value || 'rating';
+      const periodOption = data.options?.find(o => o.name === 'period')?.value || 'week';
+      const message = await buildLeaderboard(metricOption, periodOption);
+      return res.send({
+        type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+        data: {
+          content: message,
         },
       });
     }

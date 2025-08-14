@@ -36,6 +36,29 @@ export async function get_chess_recent_games(userName) {
 }
 
 
+export async function get_games_in_last_days(username, days) {
+    const now = new Date();
+    const months = [{ year: now.getFullYear(), month: now.getMonth() + 1 }];
+    const previous = new Date(now);
+    previous.setMonth(previous.getMonth() - 1);
+    if (days > now.getDate()) {
+        months.push({ year: previous.getFullYear(), month: previous.getMonth() + 1 });
+    }
+
+    let games = [];
+    for (const { year, month } of months) {
+        const formattedMonth = month.toString().padStart(2, '0');
+        const url = `https://api.chess.com/pub/player/${username.toLowerCase()}/games/${year}/${formattedMonth}`;
+        const response = await getResponse(url);
+        if (response && Array.isArray(response.games)) {
+            games = games.concat(response.games);
+        }
+    }
+
+    const cutoff = now.getTime() - days * 24 * 60 * 60 * 1000;
+    return games.filter(g => g.end_time * 1000 >= cutoff);
+}
+
 export async function get_chess_stats(userName) {
     const url = `https://api.chess.com/pub/player/${userName.toLowerCase()}/stats`;
 
