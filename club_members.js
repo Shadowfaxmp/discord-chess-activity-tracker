@@ -9,7 +9,6 @@ export const clubMembers = [
     "oThoron",
     "MrJoeMcDonald",
     "mewtationdoodle",
-    //"bmr142",
     "BurpingBishop",
     "bkeith0217",
     "seanb354",
@@ -17,5 +16,5 @@ export const clubMembers = [
 
 // Array to hold lichess.org usernames
 export const lichessClubMembers = [
-    // Add Lichess usernames here
+    "shadowfax_7"
 ];
